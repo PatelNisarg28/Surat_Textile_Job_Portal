@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            display: flex;
+        }
+
+        .sidebar {
+            width: 200px;
+            background-color: #f4f4f4;
+            padding: 20px;
+            padding-top: 50px; /* Added padding at the top */
+            display: block;
+            margin-bottom: 10px;
+            text-decoration: none;
+            height: 86vh; /* Set height to 100% of the viewport height */
+            box-sizing: border-box; /* Include padding and border in the total height */
+        }
+
+        .column {
+            width: 48%; /* Adjust the width as needed */
+            box-sizing: border-box;
+            display: inline-block;
+            vertical-align: top;
+        }
+
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto; 
+            max-height: 80vh;
+        }
+
+        .heading {
+            text-align: center;
+            background-color: #fff;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+
+        .filter-heading {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .filter-options {
+            margin-bottom: 20px;
+        }
+
+        .owner-box {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        header {
+            background-color: black;
+            color: white;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <h1>Owner List</h1>
+        </div>
+    </header>
+
+<div class="container">
+    <div class="sidebar">
+        <div class="filter-heading">Filters</div>
+        <div class="filter-options">
+            <div class="filter-heading">Filter for Industry</div>
+            <ul style="list-style-type: none; padding: 0;">
+                <li><label><input type="checkbox" name="industry" value="Pramukh"> Pramukh</label></li>
+                <li><label><input type="checkbox" name="industry" value="Bhagvati"> Bhagvati</label></li>
+                <li><label><input type="checkbox" name="industry" value="Sonal"> Sonal</label></li>
+            </ul>
+        </div>
+        <div class="filter-options">
+            <div class="filter-heading">Filter for Work Role</div>
+            <ul style="list-style-type: none; padding: 0;">
+                <li><label><input type="checkbox" name="work_role" value="bobin"> Bobin</label></li>
+                <li><label><input type="checkbox" name="work_role" value="tfo"> TFO</label></li>
+                <li><label><input type="checkbox" name="work_role" value="master"> Master</label></li>
+            </ul>
+        </div>
+    </div>
+    <div class="content">
+        {% comment %} <div class="heading">Owner List</div> {% endcomment %}
+        {% for owner in owners %}
+            {% if owner.industrial_park_name in selected_industries or owner.work_role in selected_work_roles %}
+            <div class="owner-box">
+                <div class="column">
+                    <p>Owner Name: {{ owner.owner_name }}</p>
+                    <p>Industry: {{ owner.industrial_park_name }}</p>
+                    <p>Firm Number: {{ owner.firm_number }}</p>
+                </div>
+                <div class="column">
+                    <p>Mobile Number: {{ owner.mobile_number }}</p>
+                    <p>Number of Machines: {{ owner.number_of_machines }}</p>
+                </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+<!-- ... (previous HTML code) ... -->
+
+<script>
+    // JavaScript to handle checkbox changes and filter owners
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateOwners);
+    });
+
+    function updateOwners() {
+        const selectedIndustries = getSelectedValues('industry');
+        console.log(`Fetching data for industries: ${selectedIndustries}`);
+    
+        // Join the selected industries with commas
+        const industriesQueryString = selectedIndustries.join(',');
+    
+        fetch(`/api/filtered-owners/?industries=${industriesQueryString}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Received data:', data);
+                updateOwnerList(data);
+            })
+            //console.log(`URL: /api/filtered-owners/?industries=${industriesQueryString}`);
+            .catch(error => console.error('Error fetching owners:', error));
+    }    
+
+    function updateOwnerList(data) {
+        console.log(data)
+        const contentDiv = document.querySelector('.content');
+        contentDiv.innerHTML = '';  // Clear existing content
+
+        for (const owner of data) {
+            const ownerBox = document.createElement('div');
+            ownerBox.classList.add('owner-box');
+            ownerBox.innerHTML = `
+            <div class="column">
+                <p>Owner Name: ${owner.owner_name}</p>
+                <p>Industry: ${owner.industrial_park_name}</p>
+                <p>Firm Number: ${owner.firm_number}</p>
+            </div>
+            <div class="column">
+                <p>Mobile Number: ${owner.mobile_number}</p>
+                <p>Number of Machines: ${owner.number_of_machines}</p>
+            </div>
+        `;
+        contentDiv.appendChild(ownerBox);
+        }
+    }
+
+    function getSelectedValues(name) {
+        const checkboxes = document.querySelectorAll(`input[name="${name}"]:checked`);
+        return Array.from(checkboxes).map(checkbox => checkbox.value);
+    }
+</script>
+
+<!-- ... (remaining HTML code) ... -->
+
+</body>
+</html>

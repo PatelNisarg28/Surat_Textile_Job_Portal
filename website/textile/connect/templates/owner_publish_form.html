@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Add this style block to the head of your HTML file or include it in a separate CSS file -->
+    <style>
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            width: 60%;
+            margin: 0 auto;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 2px;
+            width: 30px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+        }
+
+        .number-box {
+            display: none;
+            padding-left:15px;
+            width: 60px;
+        }
+
+        .checkbox-group input:checked + .number-box {
+            display: block;
+        }
+
+        button {
+            grid-column: span 2;
+            background-color: #4caf50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #success-message {
+            margin-top: 16px;
+            color: #4caf50;
+            font-weight: bold;
+            grid-column: span 2;
+        }
+    </style>
+</head>
+<body>
+    <form id="owner-publish-form">
+        {% csrf_token %}
+
+        <label for="industrial_park_name">Industrial Park Name:</label>
+        <select id="industrial_park_name" name="industrial_park_name" required>
+            {% for choice in form.industrial_park_name.field.choices %}
+            <option value="{{ choice.0 }}" {% if choice.0 == form.instance.industrial_park_name %}selected{% endif %}>{{ choice.1 }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="owner_name">Owner Name:</label>
+        <input type="text" id="owner_name" name="owner_name" value="{{ form.instance.owner_name|default:'' }}" required>
+
+        <label for="firm_number">Firm Number:</label>
+        <input type="text" id="firm_number" name="firm_number" value="{{ form.instance.firm_number|default:'' }}" required>
+
+        <label for="mobile_number">Mobile Number:</label>
+        <input type="text" id="mobile_number" name="mobile_number" value="{{ form.instance.mobile_number|default:'' }}" required>
+
+        <label for="number_of_machines">Number of Machines:</label>
+        <input type="number" id="number_of_machines" name="number_of_machines" value="{{ form.instance.number_of_machines|default:'' }}" required>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="requirement_bobin_checkbox" name="requirement_bobin_checkbox" {% if form.instance.requirement_bobin_checkbox %}checked{% endif %}>
+            <label for="requirement_bobin_checkbox">Bobin</label>
+            <div class="number-box">
+                <input type="number" id="requirement_bobin" name="requirement_bobin" value="{{ form.instance.requirement_bobin|default:'' }}">
+            </div>
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="requirement_tfo_checkbox" name="requirement_tfo_checkbox" {% if form.instance.requirement_tfo_checkbox %}checked{% endif %}>
+            <label for="requirement_tfo_checkbox">TFO</label>
+            <div class="number-box">
+                <input type="number" id="requirement_tfo" name="requirement_tfo" value="{{ form.instance.requirement_tfo|default:'' }}">
+            </div>
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="requirement_karigar_checkbox" name="requirement_karigar_checkbox" {% if form.instance.requirement_karigar_checkbox %}checked{% endif %}>
+            <label for="requirement_karigar_checkbox">Karigar</label>
+            <div class="number-box">
+                <input type="number" id="requirement_karigar" name="requirement_karigar" value="{{ form.instance.requirement_karigar|default:'' }}">
+            </div>
+        </div>
+
+        <input type="hidden" id="submitted-flag" value="{% if existing_submission %}true{% else %}false{% endif %}">
+
+        <div id="success-message" style="display: none;">
+            <p>Form submitted successfully!</p>
+        </div>
+
+        <button type="submit">Submit Form</button>
+    </form>
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Check if the form has been submitted previously
+            var existingSubmission = $('#submitted-flag').val() === 'true';
+
+            // If the form has been submitted, hide the form and display the success message
+            if (existingSubmission) {
+                $('#owner-publish-form').hide();
+                $('#success-message').show();
+            }
+
+            // Handle checkbox click events
+            $('.checkbox-group input[type="checkbox"]').on('change', function () {
+                $(this).siblings('.number-box').toggle(this.checked);
+            });
+
+            // Handle form submission
+            $('#owner-publish-form').submit(function (event) {
+                event.preventDefault(); // Prevent the default form submission
+
+                // AJAX request to submit the form data
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "owner_publish_form" %}',
+                    data: $(this).serialize(),
+                    success: function (response) {
+                        // Hide the form and display the success message on successful submission
+                        $('#owner-publish-form').hide();
+                        $('#success-message').show();
+                    },
+                    error: function (error) {
+                        console.log('Error:', error);
+                        // Handle errors if needed
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

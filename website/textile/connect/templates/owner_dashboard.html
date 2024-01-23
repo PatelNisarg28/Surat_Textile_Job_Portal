@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Dashboard</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: black;
+            color: white;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        #main-container {
+            display: flex;
+            flex: 1;
+        }
+
+        #sidebar {
+            width: 250px;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            background-color: #333;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        #sidebar a {
+            display: block;
+            padding: 10px;
+            margin-bottom: 10px;
+            color: white;
+            background-color: blue;
+            text-decoration: none;
+        }
+
+        #content {
+            flex: 1;
+            padding: 20px;
+            margin: 0 auto; /*
+            overflow-y: auto; 
+            max-height: 80vh;
+        }
+        
+
+        h1 {
+            margin-left: 10px;
+            background-color: black;
+            padding: 10px;
+        }
+
+        #form-container {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div>
+            <h1>Owner Dashboard</h1>
+        </div>
+    </header>
+    <!-- Main Content Section -->
+    <div id="main-container">
+        <!-- Sidebar -->
+        <div id="sidebar">
+            <a href="#" id="owner-publish-link">Owner Publish Form</a>
+            <a href="{% url 'worker_list' %}">All workers</a>
+            <!-- Add other sidebar links as needed -->
+        </div>
+
+        <!-- Content -->
+        <div id="content">
+            <!-- Your main content goes here -->
+            <h2 style="padding-left: 370px;">Your Dashboard Content</h2>
+            <div id="form-container"></div>
+        </div>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Handle the click event for the "Owner Publish Form" link
+            $('#owner-publish-link').click(function (event) {
+                event.preventDefault(); // Prevent the default link behavior
+
+                // AJAX request to load the form
+                $.ajax({
+                    type: 'GET',
+                    url: '{% url "owner_publish_form" %}',
+                    success: function (response) {
+                        // Display the form container and populate it with the form HTML
+                        $('#form-container').html(response).show();
+                    },
+                    error: function (error) {
+                        console.log('Error:', error);
+                        // Handle errors if needed
+                    }
+                });
+            });
+
+            // Handle form submission inside the form-container
+            $('#form-container').on('submit', '#owner-publish-form', function (event) {
+                event.preventDefault(); // Prevent the default form submission
+
+                // AJAX request to submit the form data
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "owner_publish_form" %}',
+                    data: $(this).serialize(),      
+                    success: function (response) {
+                        // Display the success message inside the form-container
+                        $('#form-container').html('<p>Form submitted successfully!</p>');
+                    },
+                    error: function (error) {
+                        console.log('Error:', error);
+                        // Handle errors if needed
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

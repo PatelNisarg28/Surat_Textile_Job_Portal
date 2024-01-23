@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            width: 70%;
+            box-sizing: border-box;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #success-message {
+            margin-top: 16px;
+            color: #4caf50;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <form id="worker-profile-form" method="post">
+        {% csrf_token %}
+
+        <div>
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" value="{{ form.instance.name|default:'' }}" required>
+        </div>
+
+        <div>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" value="{{ form.instance.email|default:'' }}">
+        </div>
+
+        <div>
+            <label for="phone_number">Phone Number:</label>
+            <input type="text" id="phone_number" name="phone_number" value="{{ form.instance.phone_number|default:'' }}" required>
+        </div>
+
+        <div>
+            <label for="living_area">Living Area:</label>
+            <input type="text" id="living_area" name="living_area" value="{{ form.instance.living_area|default:'' }}" required>
+        </div>
+
+        <div>
+            <label for="work_location">Work Location:</label>
+            <select id="work_location" name="work_location" required>
+                {% for choice in form.work_location.field.choices %}
+                    <option value="{{ choice.0 }}" {% if choice.0 == form.instance.work_location %}selected{% endif %}>{{ choice.1 }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label for="area_of_work">Area of Work:</label>
+            <select id="area_of_work" name="area_of_work" required>
+                {% for choice in form.area_of_work.field.choices %}
+                    <option value="{{ choice.0 }}" {% if choice.0 == form.instance.area_of_work %}selected{% endif %}>{{ choice.1 }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label for="open_to_work">Open to Work:</label>
+            <input type="checkbox" id="open_to_work" name="open_to_work" {% if form.instance.open_to_work %}checked{% endif %}>
+        </div>
+    
+        <div>
+            <label for="currently_working">Currently Working:</label>
+            <input type="checkbox" id="currently_working" name="currently_working" {% if form.instance.currently_working %}checked{% endif %}>
+        </div>
+
+        <input type="hidden" id="submitted-flag" value="{% if existing_submission %}true{% else %}false{% endif %}">
+
+        <div id="success-message" style="display: none;">
+            <p>Form submitted successfully!</p>
+        </div>
+
+        <button type="submit">Submit Form</button>
+    </form>
+    
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var existingSubmission = $('#submitted-flag').val() === 'true';
+
+            if (existingSubmission) {
+                $('#worker-profile').hide();
+                $('#success-message').show();
+            }
+
+            $('#worker-profile').submit(function (event) {
+                event.preventDefault();
+
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "worker_profile" %}',
+                    data: $(this).serialize(),
+                    success: function (response) {
+                        $('#worker-profile').hide();
+                        $('#success-message').show();
+                    },
+                    error: function (error) {
+                        console.log('Error:', error);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
