@@ -1,4 +1,4 @@
-# Surat_Textile_Job_Portal
+# Textile_Industry_Portal
 
 This website is helpful for people who are connected to the Surat textile business. This website's purpose is to create an easy job portal which is very helpful for owners and workers to get connected.
 
